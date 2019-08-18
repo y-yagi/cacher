@@ -1,8 +1,11 @@
 package cacher
 
+import "sync"
+
 // Cacher is a type for cache.
 type Cacher struct {
 	store Store
+	mu    sync.Mutex
 }
 
 // Store is a interface for store.
@@ -21,15 +24,21 @@ func WithFileStore(path string) *Cacher {
 
 // Read cache.
 func (c *Cacher) Read(key string) ([]byte, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.store.Read(key)
 }
 
 // Write create a new cache.
 func (c *Cacher) Write(key string, value []byte) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.store.Write(key, value)
 }
 
 // Delete delete cache.
 func (c *Cacher) Delete(key string) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.store.Delete(key)
 }
