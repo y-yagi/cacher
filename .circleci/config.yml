@@ -4,6 +4,11 @@ test: &test
   steps:
     - checkout
     - run:
+        name: Run go mod
+        command: |
+          go mod download
+          go mod vendor
+    - run:
         name: Run lint
         command: |
           go get -u golang.org/x/lint/golint
@@ -21,6 +26,8 @@ jobs:
   go-1.12-test:
     docker:
       - image: circleci/golang:1.12
+        environment:
+          GO111MODULE: "on"
     working_directory: /go/src/github.com/y-yagi/cacher
     <<: *test
 
