@@ -8,10 +8,12 @@ import (
 	"github.com/y-yagi/goext/osext"
 )
 
+// FileStore is a type for FileStore.
 type FileStore struct {
 	path string
 }
 
+// NewFileStore create a new FileStore.
 func NewFileStore(path string) *FileStore {
 	fs := &FileStore{path: path}
 	return fs
