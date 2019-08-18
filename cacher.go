@@ -1,10 +1,11 @@
 package cacher
 
-// Cache is a type for file cache.
+// Cacher is a type for cache.
 type Cacher struct {
 	store Store
 }
 
+// Store is a interface for store.
 type Store interface {
 	Read(key string) ([]byte, error)
 	Write(key string, value []byte) error
