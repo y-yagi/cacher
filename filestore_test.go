@@ -21,7 +21,7 @@ func TestFileStore(t *testing.T) {
 		t.Fatalf("want nil, got %q", got)
 	}
 
-	cacher.Write("cacher-test", data, 0)
+	cacher.Write("cacher-test", data, Forever)
 	got, _ = cacher.Read("cacher-test")
 	if string(got) != string(data) {
 		t.Fatalf("want %q, got %q", data, got)

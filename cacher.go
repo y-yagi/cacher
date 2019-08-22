@@ -20,12 +20,17 @@ type Store interface {
 	Delete(key string) error
 }
 
+const (
+	// Forever use to cache never expire.
+	Forever time.Duration = -1
+)
+
 type entry struct {
 	Value      []byte
 	Expiration int64
 }
 
-func (e *entry) Expired() bool {
+func (e *entry) expired() bool {
 	if e.Expiration == 0 {
 		return false
 	}
@@ -50,7 +55,7 @@ func (c *Cacher) Read(key string) ([]byte, error) {
 	}
 
 	e := decode(d)
-	if e.Expired() {
+	if e.expired() {
 		return nil, nil
 	}
 
