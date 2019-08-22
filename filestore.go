@@ -29,9 +29,9 @@ func (fs *FileStore) Read(key string) ([]byte, error) {
 }
 
 // Write create a new cache.
-func (fs *FileStore) Write(key string, value []byte) error {
+func (fs *FileStore) Write(key string, data []byte) error {
 	file := filepath.Join(fs.path, key)
-	return ioutil.WriteFile(file, value, 0644)
+	return ioutil.WriteFile(file, data, 0644)
 }
 
 // Delete delete cache.
