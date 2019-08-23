@@ -42,8 +42,8 @@ func (fs *FileStore) Read(key string) ([]byte, error) {
 }
 
 // Write create a new cache.
-func (fs *FileStore) Write(key string, data []byte, d time.Duration) error {
-	e := &entry{Value: data}
+func (fs *FileStore) Write(key string, value []byte, d time.Duration) error {
+	e := &entry{Value: value}
 	if d > 0 {
 		e.Expiration = time.Now().Add(d).UnixNano()
 	}

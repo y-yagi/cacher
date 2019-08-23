@@ -14,17 +14,17 @@ func TestFileStore(t *testing.T) {
 	}
 	defer os.RemoveAll(tempDir)
 
-	data := []byte("dummy")
+	value := []byte("dummy")
 	cacher := WithFileStore(tempDir)
 	got, _ := cacher.Read("cacher-test")
 	if got != nil {
 		t.Fatalf("want nil, got %q", got)
 	}
 
-	cacher.Write("cacher-test", data, Forever)
+	cacher.Write("cacher-test", value, Forever)
 	got, _ = cacher.Read("cacher-test")
-	if string(got) != string(data) {
-		t.Fatalf("want %q, got %q", data, got)
+	if string(got) != string(value) {
+		t.Fatalf("want %q, got %q", value, got)
 	}
 
 	cacher.Delete("cacher-test")
@@ -41,10 +41,10 @@ func TestFileStoreWithExpired(t *testing.T) {
 	}
 	defer os.RemoveAll(tempDir)
 
-	data := []byte("dummy")
+	value := []byte("dummy")
 	cacher := WithFileStore(tempDir)
 
-	cacher.Write("cacher-test", data, 1*time.Second)
+	cacher.Write("cacher-test", value, 1*time.Second)
 
 	time.Sleep(2 * time.Second)
 
