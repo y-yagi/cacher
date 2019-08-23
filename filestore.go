@@ -21,12 +21,6 @@ type entry struct {
 	Expiration int64
 }
 
-// NewFileStore create a new FileStore.
-func NewFileStore(path string) *FileStore {
-	fs := &FileStore{path: path}
-	return fs
-}
-
 // Read cache.
 func (fs *FileStore) Read(key string) ([]byte, error) {
 	file := filepath.Join(fs.path, key)
