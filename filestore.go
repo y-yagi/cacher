@@ -1,9 +1,12 @@
 package cacher
 
 import (
+	"bytes"
+	"encoding/gob"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/y-yagi/goext/osext"
 )
@@ -13,10 +16,9 @@ type FileStore struct {
 	path string
 }
 
-// NewFileStore create a new FileStore.
-func NewFileStore(path string) *FileStore {
-	fs := &FileStore{path: path}
-	return fs
+type entry struct {
+	Value      []byte
+	Expiration int64
 }
 
 // Read cache.
@@ -25,13 +27,29 @@ func (fs *FileStore) Read(key string) ([]byte, error) {
 	if !osext.IsExist(file) {
 		return nil, nil
 	}
-	return ioutil.ReadFile(file)
+
+	b, err := ioutil.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+
+	e := fs.decode(b)
+	if e.expired() {
+		return nil, nil
+	}
+
+	return e.Value, nil
 }
 
 // Write create a new cache.
-func (fs *FileStore) Write(key string, data []byte) error {
+func (fs *FileStore) Write(key string, value []byte, d time.Duration) error {
+	e := &entry{Value: value}
+	if d > 0 {
+		e.Expiration = time.Now().Add(d).UnixNano()
+	}
+
 	file := filepath.Join(fs.path, key)
-	return ioutil.WriteFile(file, data, 0644)
+	return ioutil.WriteFile(file, fs.encode(e), 0644)
 }
 
 // Delete delete cache.
@@ -42,4 +60,24 @@ func (fs *FileStore) Delete(key string) error {
 	}
 
 	return os.Remove(file)
+}
+
+func (fs *FileStore) encode(e *entry) []byte {
+	buf := bytes.NewBuffer(nil)
+	_ = gob.NewEncoder(buf).Encode(e)
+	return buf.Bytes()
+}
+
+func (fs *FileStore) decode(data []byte) *entry {
+	var e entry
+	buf := bytes.NewBuffer(data)
+	_ = gob.NewDecoder(buf).Decode(&e)
+	return &e
+}
+
+func (e *entry) expired() bool {
+	if e.Expiration == 0 {
+		return false
+	}
+	return time.Now().UnixNano() > e.Expiration
 }
