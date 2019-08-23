@@ -7,7 +7,7 @@ import (
 
 // Cacher is a type for cache.
 type Cacher struct {
-	store Store
+	Store Store
 	mu    sync.Mutex
 }
 
@@ -26,7 +26,7 @@ const (
 // WithFileStore create a new Cache with FileStore.
 func WithFileStore(path string) *Cacher {
 	cache := &Cacher{}
-	cache.store = &FileStore{path: path}
+	cache.Store = &FileStore{path: path}
 	return cache
 }
 
@@ -34,19 +34,19 @@ func WithFileStore(path string) *Cacher {
 func (c *Cacher) Read(key string) ([]byte, error) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	return c.store.Read(key)
+	return c.Store.Read(key)
 }
 
 // Write create a new cache.
 func (c *Cacher) Write(key string, value []byte, d time.Duration) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	return c.store.Write(key, value, d)
+	return c.Store.Write(key, value, d)
 }
 
 // Delete delete cache.
 func (c *Cacher) Delete(key string) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	return c.store.Delete(key)
+	return c.Store.Delete(key)
 }
