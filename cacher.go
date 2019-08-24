@@ -16,6 +16,7 @@ type Store interface {
 	Read(key string) ([]byte, error)
 	Write(key string, value []byte, d time.Duration) error
 	Delete(key string) error
+	Cleanup() error
 }
 
 const (
@@ -49,4 +50,11 @@ func (c *Cacher) Delete(key string) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.Store.Delete(key)
+}
+
+// Cleanup clear expired cache.
+func (c *Cacher) Cleanup() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.Store.Cleanup()
 }
