@@ -21,6 +21,8 @@ type entry struct {
 	Expiration int64
 }
 
+const fileprefix = "cacher-"
+
 // Read cache.
 func (fs *FileStore) Read(key string) ([]byte, error) {
 	filename := fs.filename(key)
@@ -61,6 +63,22 @@ func (fs *FileStore) Delete(key string) error {
 	return os.Remove(filename)
 }
 
+// Cleanup clear expired cache.
+func (fs *FileStore) Cleanup() error {
+	matches, err := filepath.Glob(filepath.Join(fs.path, fileprefix+"*"))
+	if err != nil {
+		return err
+	}
+
+	for _, match := range matches {
+		if err = os.Remove(match); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (fs *FileStore) encode(e *entry) []byte {
 	buf := bytes.NewBuffer(nil)
 	_ = gob.NewEncoder(buf).Encode(e)
@@ -75,7 +93,7 @@ func (fs *FileStore) decode(data []byte) *entry {
 }
 
 func (fs *FileStore) filename(key string) string {
-	return filepath.Join(fs.path, "cacher-"+key)
+	return filepath.Join(fs.path, fileprefix+key)
 }
 
 func (e *entry) expired() bool {

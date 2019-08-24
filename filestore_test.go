@@ -53,3 +53,24 @@ func TestFileStoreWithExpired(t *testing.T) {
 		t.Fatalf("want nil, got %q", got)
 	}
 }
+
+func TestFileStoreCleanup(t *testing.T) {
+	tempDir, err := ioutil.TempDir("", "cacher-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	c := WithFileStore(tempDir)
+	c.Write("foo", []byte("dummy"), Forever)
+	c.Write("bar", []byte("dummy"), Forever)
+	c.Write("baz", []byte("dummy"), Forever)
+	c.Cleanup()
+
+	keys := []string{"foo", "bar", "baz"}
+	for _, key := range keys {
+		if got, _ := c.Read(key); got != nil {
+			t.Fatalf("want nil, got %q", got)
+		}
+	}
+}
