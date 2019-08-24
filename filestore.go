@@ -23,12 +23,12 @@ type entry struct {
 
 // Read cache.
 func (fs *FileStore) Read(key string) ([]byte, error) {
-	file := filepath.Join(fs.path, key)
-	if !osext.IsExist(file) {
+	filename := fs.filename(key)
+	if !osext.IsExist(filename) {
 		return nil, nil
 	}
 
-	b, err := ioutil.ReadFile(file)
+	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -48,18 +48,17 @@ func (fs *FileStore) Write(key string, value []byte, d time.Duration) error {
 		e.Expiration = time.Now().Add(d).UnixNano()
 	}
 
-	file := filepath.Join(fs.path, key)
-	return ioutil.WriteFile(file, fs.encode(e), 0644)
+	return ioutil.WriteFile(fs.filename(key), fs.encode(e), 0644)
 }
 
 // Delete delete cache.
 func (fs *FileStore) Delete(key string) error {
-	file := filepath.Join(fs.path, key)
-	if !osext.IsExist(file) {
+	filename := fs.filename(key)
+	if !osext.IsExist(filename) {
 		return nil
 	}
 
-	return os.Remove(file)
+	return os.Remove(filename)
 }
 
 func (fs *FileStore) encode(e *entry) []byte {
@@ -73,6 +72,10 @@ func (fs *FileStore) decode(data []byte) *entry {
 	buf := bytes.NewBuffer(data)
 	_ = gob.NewDecoder(buf).Decode(&e)
 	return &e
+}
+
+func (fs *FileStore) filename(key string) string {
+	return filepath.Join(fs.path, "cacher-"+key)
 }
 
 func (e *entry) expired() bool {
