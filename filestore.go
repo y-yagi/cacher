@@ -11,7 +11,7 @@ import (
 	"github.com/y-yagi/goext/osext"
 )
 
-// FileStore is a type for FileStore.
+// FileStore is a type for file store.
 type FileStore struct {
 	path string
 }
@@ -23,7 +23,7 @@ type entry struct {
 
 const fileprefix = "cacher-"
 
-// Read cache.
+// Read reads cache from a file store.
 func (fs *FileStore) Read(key string) ([]byte, error) {
 	filename := fs.filename(key)
 	if !osext.IsExist(filename) {
@@ -42,7 +42,7 @@ func (fs *FileStore) Read(key string) ([]byte, error) {
 	return e.Value, nil
 }
 
-// Write create a new cache.
+// Write stores data to a file store.
 func (fs *FileStore) Write(key string, value []byte, d time.Duration) error {
 	e := &entry{Value: value}
 	if d > 0 {
@@ -52,7 +52,7 @@ func (fs *FileStore) Write(key string, value []byte, d time.Duration) error {
 	return ioutil.WriteFile(fs.filename(key), fs.encode(e), 0644)
 }
 
-// Delete delete cache.
+// Delete deletes data from a file store.
 func (fs *FileStore) Delete(key string) error {
 	filename := fs.filename(key)
 	if !osext.IsExist(filename) {
@@ -62,7 +62,7 @@ func (fs *FileStore) Delete(key string) error {
 	return os.Remove(filename)
 }
 
-// Cleanup clear expired cache.
+// Cleanup deletes the expired cache.
 func (fs *FileStore) Cleanup() error {
 	matches, err := filepath.Glob(filepath.Join(fs.path, fileprefix+"*"))
 	if err != nil {
