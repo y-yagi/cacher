@@ -62,15 +62,17 @@ func TestFileStoreCleanup(t *testing.T) {
 	defer os.RemoveAll(tempDir)
 
 	c := WithFileStore(tempDir)
-	c.Write("foo", []byte("dummy"), Forever)
-	c.Write("bar", []byte("dummy"), Forever)
-	c.Write("baz", []byte("dummy"), Forever)
+	c.Write("foo", []byte("foo"), Forever)
+	c.Write("bar", []byte("bar"), 1*time.Second)
+	c.Write("baz", []byte("baz"), Forever)
+
+	time.Sleep(2 * time.Second)
 	c.Cleanup()
 
-	keys := []string{"foo", "bar", "baz"}
-	for _, key := range keys {
-		if got, _ := c.Read(key); got != nil {
-			t.Fatalf("want nil, got %q", got)
+	keys := map[string]string{"foo": "foo", "bar": "", "baz": "baz"}
+	for key, want := range keys {
+		if got, _ := c.Read(key); string(got) != want {
+			t.Fatalf("want %q, got %q", want, got)
 		}
 	}
 }

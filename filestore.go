@@ -30,12 +30,11 @@ func (fs *FileStore) Read(key string) ([]byte, error) {
 		return nil, nil
 	}
 
-	b, err := ioutil.ReadFile(filename)
+	e, err := fs.readFile(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	e := fs.decode(b)
 	if e.expired() {
 		return nil, nil
 	}
@@ -71,12 +70,28 @@ func (fs *FileStore) Cleanup() error {
 	}
 
 	for _, match := range matches {
-		if err = os.Remove(match); err != nil {
+		e, err := fs.readFile(match)
+		if err != nil {
 			return err
+		}
+
+		if e.expired() {
+			if err = os.Remove(match); err != nil {
+				return err
+			}
 		}
 	}
 
 	return nil
+}
+
+func (fs *FileStore) readFile(filename string) (*entry, error) {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	return fs.decode(b), err
 }
 
 func (fs *FileStore) encode(e *entry) []byte {
