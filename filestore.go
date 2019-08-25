@@ -25,11 +25,11 @@ const fileprefix = "cacher-"
 
 // Read reads cache from a file store.
 func (fs *FileStore) Read(key string) ([]byte, error) {
-	filename := fs.filename(key)
-	if !osext.IsExist(filename) {
+	if !fs.Exist(key) {
 		return nil, nil
 	}
 
+	filename := fs.filename(key)
 	e, err := fs.readFile(filename)
 	if err != nil {
 		return nil, err
@@ -83,6 +83,12 @@ func (fs *FileStore) Cleanup() error {
 	}
 
 	return nil
+}
+
+// Exist check the cache exists or not.
+func (fs *FileStore) Exist(key string) bool {
+	filename := fs.filename(key)
+	return osext.IsExist(filename)
 }
 
 func (fs *FileStore) readFile(filename string) (*entry, error) {

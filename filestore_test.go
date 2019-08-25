@@ -7,13 +7,22 @@ import (
 	"time"
 )
 
-func TestFileStore(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "cacher-test")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tempDir)
+var tempDir string
 
+func TestMain(m *testing.M) {
+	var err error
+	tempDir, err = ioutil.TempDir("", "cacher-test")
+	if err != nil {
+		panic(err)
+	}
+
+	code := m.Run()
+
+	os.RemoveAll(tempDir)
+	os.Exit(code)
+}
+
+func TestFileStore(t *testing.T) {
 	value := []byte("dummy")
 	cacher := WithFileStore(tempDir)
 	got, _ := cacher.Read("cacher-test")
@@ -34,13 +43,7 @@ func TestFileStore(t *testing.T) {
 	}
 }
 
-func TestFileStoreWithExpired(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "cacher-test")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tempDir)
-
+func TestFileStoreWith_Expired(t *testing.T) {
 	value := []byte("dummy")
 	cacher := WithFileStore(tempDir)
 
@@ -54,13 +57,7 @@ func TestFileStoreWithExpired(t *testing.T) {
 	}
 }
 
-func TestFileStoreCleanup(t *testing.T) {
-	tempDir, err := ioutil.TempDir("", "cacher-test")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tempDir)
-
+func TestFileStore_Cleanup(t *testing.T) {
 	c := WithFileStore(tempDir)
 	c.Write("foo", []byte("foo"), Forever)
 	c.Write("bar", []byte("bar"), 1*time.Second)
@@ -74,5 +71,17 @@ func TestFileStoreCleanup(t *testing.T) {
 		if got, _ := c.Read(key); string(got) != want {
 			t.Fatalf("want %q, got %q", want, got)
 		}
+	}
+}
+
+func TestFileStore_Exist(t *testing.T) {
+	c := WithFileStore(tempDir)
+	if c.Exist("not-exist") {
+		t.Fatalf("want false, got true")
+	}
+
+	c.Write("exist", []byte("foo"), Forever)
+	if !c.Exist("exist") {
+		t.Fatalf("want true, got false")
 	}
 }
