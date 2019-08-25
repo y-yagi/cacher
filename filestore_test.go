@@ -76,3 +76,21 @@ func TestFileStoreCleanup(t *testing.T) {
 		}
 	}
 }
+
+func TestFileStore_Exist(t *testing.T) {
+	tempDir, err := ioutil.TempDir("", "cacher-test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir)
+
+	c := WithFileStore(tempDir)
+	if c.Exist("foo") {
+		t.Fatalf("want false, got true")
+	}
+
+	c.Write("foo", []byte("foo"), Forever)
+	if !c.Exist("foo") {
+		t.Fatalf("want true, got false")
+	}
+}

@@ -17,6 +17,7 @@ type Store interface {
 	Write(key string, value []byte, d time.Duration) error
 	Delete(key string) error
 	Cleanup() error
+	Exist(key string) bool
 }
 
 const (
@@ -57,4 +58,11 @@ func (c *Cacher) Cleanup() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.Store.Cleanup()
+}
+
+// Exist check the cache exists or not.
+func (c *Cacher) Exist(key string) bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.Store.Exist(key)
 }
