@@ -32,6 +32,13 @@ func WithFileStore(path string) *Cacher {
 	return cache
 }
 
+// WithNilStore create a new Cacher with a nil store.
+func WithNilStore() *Cacher {
+	cache := &Cacher{}
+	cache.Store = &NilStore{}
+	return cache
+}
+
 // Read reads cache from a store.
 func (c *Cacher) Read(key string) ([]byte, error) {
 	c.mu.Lock()
